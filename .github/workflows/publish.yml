@@ -52,7 +52,7 @@ jobs:
           cd dist && ls
 
       - name: publish
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           name: Urbani GTFS feed ${{ needs.setup.outputs.DATE }}
           tag_name: ${{ needs.setup.outputs.DATE }}
