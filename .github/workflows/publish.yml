@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      DATE: ${{ steps.get_date.outputs.DATE }}
+    steps:
+      - name: Get current date
+        id: get_date
+        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+  ubuntu:
+    strategy:
+      matrix:
+        os-version: [ "x64" ]
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: zip
+        run: zip -r feed.zip feed
+
+      - name: extract
+        run: |
+          mkdir staging
+          cp feed.zip staging
+
+      - name: upload-zip
+        uses: actions/upload-artifact@v3
+        with:
+          path: staging/feed.zip
+
+  release:
+    needs: [ setup, ubuntu ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          path: asset
+
+      - name: extract
+        run: |
+          mkdir dist
+          cp asset/artifact/* dist
+          cd dist && ls
+
+      - name: publish
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Urbani GTFS feed ${{ needs.setup.outputs.DATE }}
+          tag_name: ${{ needs.setup.outputs.DATE }}
+          body: "Automated release from the main branch. This build was created on ${{ needs.setup.outputs.DATE }}"
+          draft: false
+          prerelease: false
+          files: dist/*

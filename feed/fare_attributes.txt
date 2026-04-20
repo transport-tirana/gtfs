@@ -1,0 +1,2 @@
+fare_id,price,currency_type,payment_method,transfers
+urban_fare,40,ALL,0,0
